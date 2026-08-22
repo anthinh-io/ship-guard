@@ -1,5 +1,5 @@
 [project]
-name = "ship-guard"
+name = "app"
 version = "0.1.0"
 description = "A web application for managing and predicting delivery performance in logistics, powered by ML models trained on the Olist Brazilian E-Commerce dataset."
 requires-python = ">=3.14,<4.0"
