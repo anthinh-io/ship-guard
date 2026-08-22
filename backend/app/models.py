@@ -58,6 +58,18 @@ class User(UserBase, table=True):
     )
 
 
+# Database model, database table inferred from class name
+class Order(SQLModel, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    order_code: str = Field(unique=True, index=True, max_length=64)
+    estimated_delivery_date: datetime = Field(sa_type=DateTime(timezone=True))  # type: ignore
+    actual_delivery_date: datetime | None = Field(
+        default=None,
+        sa_type=DateTime(timezone=True),  # type: ignore
+    )
+    processing_status: str = Field(default="Chưa xử lý", max_length=50)
+
+
 # Properties to return via API, id is always required
 class UserPublic(UserBase):
     id: uuid.UUID
