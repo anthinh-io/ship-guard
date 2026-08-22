@@ -10,6 +10,8 @@ from app.models import Order
 @pytest.fixture
 def db() -> Generator[Session]:
     with Session(engine) as session:
+        session.execute(delete(Order))
+        session.commit()
         yield session
         session.execute(delete(Order))
         session.commit()

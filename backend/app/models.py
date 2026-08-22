@@ -70,6 +70,13 @@ class Order(SQLModel, table=True):
     processing_status: str = Field(default="Chưa xử lý", max_length=50)
 
 
+class DashboardKpi(SQLModel):
+    on_time_count: int
+    late_count: int
+    on_time_rate: float | None  # fraction 0.0-1.0, None khi chưa đủ dữ liệu
+    late_rate: float | None
+
+
 # Properties to return via API, id is always required
 class UserPublic(UserBase):
     id: uuid.UUID
