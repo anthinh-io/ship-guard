@@ -1,6 +1,7 @@
 {
   "files.encoding": "utf8",
   "files.autoSave": "onFocusChange",
+  "python.terminal.activateEnvironment": false,
   "terminal.integrated.suggest.enabled": true,
   "terminal.integrated.cwd": "${workspaceFolder}",
   "editor.defaultFormatter": "esbenp.prettier-vscode",
