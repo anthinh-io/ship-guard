@@ -4,7 +4,7 @@
 - Tài liệu dự án dùng tiếng Việt là ngôn ngữ chính; giữ tên riêng công nghệ nguyên bản (React, FastAPI, XGBoost, API, REST...) khi không có thuật ngữ tương đương tự nhiên.
 - Với nội dung có cấu trúc (tài liệu, kế hoạch...), người dùng thường muốn thấy outline trước khi đi vào chi tiết.
 - Các thay đổi hiển thị công khai trên GitHub (Issue, Project, Label, Milestone, Pull Request...) nên được xác nhận lặp lại trước mỗi lần thao tác — vì khó hoàn tác và ảnh hưởng đến thứ người khác nhìn thấy.
-- Commit message không cần trailer đồng tác giả (Co-Authored-By).
+- Commit message không cần trailer đồng tác giả (Co-Authored-By), viết bằng tiếng Anh, kể cả khi UI/tài liệu miền là ngôn ngữ khác — kiểm tra `git log` trước khi viết commit nếu chưa chắc.
 - Repo thuộc tài khoản cá nhân (User), không phải Organization — field "Issue type" dựng sẵn của GitHub không khả dụng ở đây; dùng field `Item Type` (User Story/Task) trong GitHub Project để thay thế.
 - GitHub Projects v2 dùng API/scope quyền riêng, tách biệt với quyền truy cập Issues/PR thông thường — đừng giả định token đã có đủ quyền, hãy tự xác minh trước khi thao tác.
 - Đặt Status = Done trên GitHub Project sẽ tự động đóng Issue liên kết.
