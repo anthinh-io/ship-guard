@@ -4,7 +4,7 @@ import pytest
 from sqlmodel import Session, delete
 
 from app.core.db import engine
-from app.models import Customer, Order, OrderItem, Product, Seller
+from app.models import Customer, Order, OrderItem, OrderPayment, Product, Seller
 
 
 @pytest.fixture
@@ -19,6 +19,7 @@ def db() -> Generator[Session]:
 
 def _clear(session: Session) -> None:
     session.execute(delete(OrderItem))
+    session.execute(delete(OrderPayment))
     session.execute(delete(Order))
     session.execute(delete(Product))
     session.execute(delete(Seller))

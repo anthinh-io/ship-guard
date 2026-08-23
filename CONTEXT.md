@@ -25,3 +25,9 @@ Xác suất một đơn sẽ giao trễ, do mô hình dự đoán tính ra — l
 
 **Thời điểm dự đoán (Predicted at)**:
 Thời điểm mô hình thực hiện dự đoán cho một đơn — lưu trên cột `predicted_at` của `Order`. Chỉ lưu kết quả dự đoán gần nhất, không lưu lịch sử nhiều lần dự đoán.
+
+**Hình thức thanh toán (Payment type)**:
+Loại hình thanh toán của một đơn (vd. `credit_card`, `voucher`, `boleto`) — lưu trên bảng `OrderPayment`, mỗi đơn có thể có nhiều dòng thanh toán. Khi cần một giá trị đại diện duy nhất cho đơn (vd. để huấn luyện mô hình), chọn loại của dòng có `payment_value` cao nhất.
+
+**Thời điểm đặt hàng (Order purchase timestamp)**:
+Thời điểm khách đặt đơn hàng — lưu trên cột `order_purchase_timestamp` của `Order`.
