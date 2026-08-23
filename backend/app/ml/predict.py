@@ -14,6 +14,8 @@ from app.ml.features import (
 )
 
 MODEL_PATH = Path(__file__).resolve().parents[3] / "models" / "risk_model.joblib"
+# Mốc khởi điểm, chưa có dữ liệu vận hành thật để tinh chỉnh — lý do đầy đủ ở
+# docs/adr/0004-risk-threshold-50-percent.md.
 RISK_THRESHOLD = 0.5
 
 _model: Any | None = None
