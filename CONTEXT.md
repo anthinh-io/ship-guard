@@ -15,3 +15,13 @@ _Avoid_: "Trạng thái đơn hàng" (mơ hồ, dễ nhầm với Trạng thái 
 **Đơn chưa xác định (Undetermined order)**:
 Một đơn hàng chưa có `actual_delivery_date` (chưa giao xong) — bị loại khỏi mọi phép tính KPI đúng hạn/trễ và mọi nhãn huấn luyện, bất kể `order_status` gốc trong dữ liệu Olist là gì (xem [ADR 0001](docs/adr/0001-delivery-status-date-only-rule.md) về trường hợp ngoại lệ hiếm gặp).
 _Avoid_: "Đơn đang xử lý", "Đơn treo"
+
+**Nhãn rủi ro (Risk label)**:
+Kết quả phân loại rủi ro trễ giao hàng cho một đơn, lưu trên cột `risk_label` của `Order` — một trong hai giá trị `high`/`low` (khoá tiếng Anh nội bộ). Dịch sang tiếng Việt lúc hiển thị: `high` → "Rủi ro cao", `low` → "Rủi ro thấp". `None` nghĩa là đơn chưa từng được dự đoán. Do luồng nhập đơn mới và nhận dự đoán rủi ro ghi vào; trang chi tiết đơn chỉ đọc và hiển thị.
+_Avoid_: lưu thẳng chuỗi tiếng Việt "Rủi ro cao"/"Rủi ro thấp" vào cột này — tách dữ liệu khỏi câu chữ hiển thị, nhất quán với cách Trạng thái giao hàng đang được biểu diễn.
+
+**Xác suất trễ (Risk probability)**:
+Xác suất một đơn sẽ giao trễ, do mô hình dự đoán tính ra — lưu trên cột `risk_probability` của `Order`, dạng phân số 0.0–1.0 (không phải phần trăm). `None` khi đơn chưa có dự đoán.
+
+**Thời điểm dự đoán (Predicted at)**:
+Thời điểm mô hình thực hiện dự đoán cho một đơn — lưu trên cột `predicted_at` của `Order`. Chỉ lưu kết quả dự đoán gần nhất, không lưu lịch sử nhiều lần dự đoán.

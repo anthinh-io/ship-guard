@@ -62,4 +62,7 @@ def get_order(code: str, session: SessionDep) -> OrderLookupResult:
         customer_city=customer.customer_city if customer else None,
         customer_state=customer.customer_state if customer else None,
         customer_zip_code_prefix=customer.customer_zip_code_prefix if customer else None,
+        risk_label=order.risk_label,
+        risk_probability=order.risk_probability,
+        predicted_at=order.predicted_at,
     )

@@ -17,6 +17,9 @@ def _make_order(
     customer_id: str | None = None,
     estimated: datetime,
     actual: datetime | None,
+    risk_label: str | None = None,
+    risk_probability: float | None = None,
+    predicted_at: datetime | None = None,
 ) -> str:
     order_code = order_code or f"test-{uuid.uuid4().hex}"
     order = Order(
@@ -24,6 +27,9 @@ def _make_order(
         customer_id=customer_id,
         estimated_delivery_date=estimated,
         actual_delivery_date=actual,
+        risk_label=risk_label,
+        risk_probability=risk_probability,
+        predicted_at=predicted_at,
     )
     session.add(order)
     session.commit()
@@ -139,3 +145,37 @@ def test_lookup_order_with_no_customer_returns_null_address(db: Session) -> None
     assert data["customer_city"] is None
     assert data["customer_state"] is None
     assert data["customer_zip_code_prefix"] is None
+
+
+def test_lookup_order_with_saved_prediction_returns_risk_fields(db: Session) -> None:
+    estimated = datetime(2024, 1, 10, tzinfo=UTC)
+    predicted_at = datetime(2024, 1, 5, tzinfo=UTC)
+    order_code = _make_order(
+        db,
+        estimated=estimated,
+        actual=estimated,
+        risk_label="high",
+        risk_probability=0.73,
+        predicted_at=predicted_at,
+    )
+
+    response = client.get(f"/api/v1/orders/{order_code}")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["risk_label"] == "high"
+    assert data["risk_probability"] == 0.73
+    assert data["predicted_at"] is not None
+
+
+def test_lookup_order_without_prediction_returns_null_risk_fields(db: Session) -> None:
+    estimated = datetime(2024, 1, 10, tzinfo=UTC)
+    order_code = _make_order(db, estimated=estimated, actual=estimated)
+
+    response = client.get(f"/api/v1/orders/{order_code}")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["risk_label"] is None
+    assert data["risk_probability"] is None
+    assert data["predicted_at"] is None

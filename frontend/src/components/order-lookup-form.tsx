@@ -12,6 +12,11 @@ const STATUS_LABEL: Record<string, string> = {
   undetermined: "Chưa xác định",
 };
 
+const RISK_LABEL: Record<string, string> = {
+  high: "Rủi ro cao",
+  low: "Rủi ro thấp",
+};
+
 const initialState: OrderLookupState = { kind: "idle" };
 
 export function OrderLookupForm() {
@@ -84,6 +89,23 @@ export function OrderLookupForm() {
                 ? `${state.data.customer_city}, ${state.data.customer_state} - ${state.data.customer_zip_code_prefix}`
                 : "Không có thông tin địa chỉ"}
             </p>
+          </div>
+
+          <div>
+            <p className="font-medium">Dự đoán rủi ro</p>
+            {state.data.risk_label ? (
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                {RISK_LABEL[state.data.risk_label]}
+                {state.data.risk_probability !== null &&
+                  ` (${Math.round(state.data.risk_probability * 100)}%)`}
+                {state.data.predicted_at &&
+                  ` · Dự đoán lúc: ${state.data.predicted_at.slice(0, 10)}`}
+              </p>
+            ) : (
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                Chưa có dự đoán cho đơn này
+              </p>
+            )}
           </div>
         </div>
       )}
