@@ -30,6 +30,7 @@ def _map_row(row: dict[str, str]) -> dict[str, object]:
         "customer_id": row["customer_id"],
         "estimated_delivery_date": _parse_utc(row["order_estimated_delivery_date"]),
         "actual_delivery_date": _parse_utc(row["order_delivered_customer_date"]),
+        "order_purchase_timestamp": _parse_utc(row["order_purchase_timestamp"]),
         "processing_status": "Chưa xử lý",
     }
 
@@ -45,6 +46,7 @@ def seed(session: Session, csv_path: Path = CSV_PATH) -> int:
             "customer_id",
             "estimated_delivery_date",
             "actual_delivery_date",
+            "order_purchase_timestamp",
         ],
     )
 

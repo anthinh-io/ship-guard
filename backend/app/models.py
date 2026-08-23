@@ -78,6 +78,10 @@ class Order(SQLModel, table=True):
         default=None,
         sa_type=DateTime(timezone=True),  # type: ignore
     )
+    order_purchase_timestamp: datetime | None = Field(
+        default=None,
+        sa_type=DateTime(timezone=True),  # type: ignore
+    )
 
 
 # Database model, database table inferred from class name
@@ -108,6 +112,15 @@ class OrderItem(SQLModel, table=True):
     order_item_id: int = Field(primary_key=True)
     product_id: str = Field(index=True, max_length=64)
     seller_id: str = Field(index=True, max_length=64)
+
+
+# Database model, database table inferred from class name
+class OrderPayment(SQLModel, table=True):
+    order_id: str = Field(primary_key=True, max_length=64)
+    payment_sequential: int = Field(primary_key=True)
+    payment_type: str = Field(max_length=32)
+    payment_installments: int
+    payment_value: float
 
 
 class DashboardKpi(SQLModel):
