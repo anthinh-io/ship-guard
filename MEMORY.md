@@ -12,3 +12,4 @@
 - Hệ thống auth có sẵn trong template (JWT, superuser, quên mật khẩu...) giữ nguyên, không xoá/viết lại — sẵn sàng dùng khi cần đăng nhập riêng cho nhân viên vận hành sau này.
 - Comment đóng DoD/cập nhật trạng thái trên Issue chỉ nêu sự thật khách quan đã hoàn thành (đã test, đã có PR...), và tránh văn phong tự tham chiếu.
 - Khi một User Story đã có sẵn sub-issue trên GitHub, viết spec kỹ thuật bằng cách comment lên issue cha và từng sub-issue liên quan — không tạo issue mới hay nhãn mới.
+- Khi ghi chú kỹ thuật gốc của Issue không khớp thực tế đã làm, cập nhật lại khối `*Ghi chú kỹ thuật:*` trong description — không dồn giải thích khác biệt vào comment.
