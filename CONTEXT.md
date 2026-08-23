@@ -17,7 +17,7 @@ Một đơn hàng chưa có `actual_delivery_date` (chưa giao xong) — bị lo
 _Avoid_: "Đơn đang xử lý", "Đơn treo"
 
 **Nhãn rủi ro (Risk label)**:
-Kết quả phân loại rủi ro trễ giao hàng cho một đơn, lưu trên cột `risk_label` của `Order` — một trong hai giá trị `high`/`low` (khoá tiếng Anh nội bộ). Dịch sang tiếng Việt lúc hiển thị: `high` → "Rủi ro cao", `low` → "Rủi ro thấp". `None` nghĩa là đơn chưa từng được dự đoán. Do mô hình dự đoán (issue #8) ghi vào; trang chi tiết đơn (issue #5) chỉ đọc và hiển thị.
+Kết quả phân loại rủi ro trễ giao hàng cho một đơn, lưu trên cột `risk_label` của `Order` — một trong hai giá trị `high`/`low` (khoá tiếng Anh nội bộ). Dịch sang tiếng Việt lúc hiển thị: `high` → "Rủi ro cao", `low` → "Rủi ro thấp". `None` nghĩa là đơn chưa từng được dự đoán. Do luồng nhập đơn mới và nhận dự đoán rủi ro ghi vào; trang chi tiết đơn chỉ đọc và hiển thị.
 _Avoid_: lưu thẳng chuỗi tiếng Việt "Rủi ro cao"/"Rủi ro thấp" vào cột này — tách dữ liệu khỏi câu chữ hiển thị, nhất quán với cách Trạng thái giao hàng đang được biểu diễn.
 
 **Xác suất trễ (Risk probability)**:
