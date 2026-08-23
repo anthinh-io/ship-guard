@@ -1,5 +1,6 @@
 import uuid
 from datetime import UTC, datetime
+from typing import Literal
 
 from pydantic import EmailStr
 from sqlalchemy import DateTime
@@ -62,6 +63,7 @@ class User(UserBase, table=True):
 class Order(SQLModel, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     order_code: str = Field(unique=True, index=True, max_length=64)
+    customer_id: str | None = Field(default=None, index=True, max_length=64)
     estimated_delivery_date: datetime = Field(sa_type=DateTime(timezone=True))  # type: ignore
     actual_delivery_date: datetime | None = Field(
         default=None,
@@ -70,11 +72,58 @@ class Order(SQLModel, table=True):
     processing_status: str = Field(default="Chưa xử lý", max_length=50)
 
 
+# Database model, database table inferred from class name
+class Product(SQLModel, table=True):
+    product_id: str = Field(primary_key=True, max_length=64)
+    category_name: str | None = Field(default=None, max_length=100)
+    category_name_english: str | None = Field(default=None, max_length=100)
+
+
+# Database model, database table inferred from class name
+class Seller(SQLModel, table=True):
+    seller_id: str = Field(primary_key=True, max_length=64)
+    seller_city: str | None = Field(default=None, max_length=100)
+    seller_state: str | None = Field(default=None, max_length=2)
+
+
+# Database model, database table inferred from class name
+class Customer(SQLModel, table=True):
+    customer_id: str = Field(primary_key=True, max_length=64)
+    customer_city: str | None = Field(default=None, max_length=100)
+    customer_state: str | None = Field(default=None, max_length=2)
+    customer_zip_code_prefix: str | None = Field(default=None, max_length=10)
+
+
+# Database model, database table inferred from class name
+class OrderItem(SQLModel, table=True):
+    order_id: str = Field(primary_key=True, max_length=64)
+    order_item_id: int = Field(primary_key=True)
+    product_id: str = Field(index=True, max_length=64)
+    seller_id: str = Field(index=True, max_length=64)
+
+
 class DashboardKpi(SQLModel):
     on_time_count: int
     late_count: int
     on_time_rate: float | None  # fraction 0.0-1.0, None khi chưa đủ dữ liệu
     late_rate: float | None
+
+
+class OrderLookupItem(SQLModel):
+    product_category: str | None
+    seller_city: str | None
+    seller_state: str | None
+
+
+class OrderLookupResult(SQLModel):
+    order_code: str
+    estimated_delivery_date: datetime
+    actual_delivery_date: datetime | None
+    status: Literal["on_time", "late", "undetermined"]
+    items: list[OrderLookupItem]
+    customer_city: str | None
+    customer_state: str | None
+    customer_zip_code_prefix: str | None
 
 
 # Properties to return via API, id is always required
