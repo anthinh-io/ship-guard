@@ -5,7 +5,6 @@ from typing import Any
 
 import joblib
 import pandas as pd
-from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
@@ -13,46 +12,9 @@ from sklearn.metrics import make_scorer, recall_score
 from sklearn.model_selection import StratifiedKFold, cross_val_score
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
-from xgboost import XGBClassifier
 
 from app.ml.features import CATEGORICAL_FEATURES, NUMERIC_FEATURES, prepare_features
-
-_LABEL_TO_INT = {"on_time": 0, "late": 1}
-_INT_TO_LABEL = {0: "on_time", 1: "late"}
-
-
-class XGBoostClassifier(BaseEstimator, ClassifierMixin):  # type: ignore[misc]
-    """Bọc XGBClassifier để dùng trực tiếp nhãn chuỗi "late"/"on_time".
-
-    xgboost.XGBClassifier chỉ chấp nhận nhãn dạng số (0/1), khác với
-    LogisticRegression/RandomForestClassifier của scikit-learn vốn chấp nhận
-    nhãn chuỗi trực tiếp — wrapper này che đi khác biệt đó.
-    """
-
-    def __init__(self, scale_pos_weight: float = 1.0, random_state: int = 42) -> None:
-        self.scale_pos_weight = scale_pos_weight
-        self.random_state = random_state
-
-    def fit(self, X: pd.DataFrame, y: pd.Series) -> XGBoostClassifier:
-        y_encoded = pd.Series(y).map(_LABEL_TO_INT)
-        self.classes_ = ["late", "on_time"]
-        self._model = XGBClassifier(
-            scale_pos_weight=self.scale_pos_weight,
-            eval_metric="logloss",
-            random_state=self.random_state,
-        )
-        self._model.fit(X, y_encoded)
-        return self
-
-    def predict(self, X: pd.DataFrame) -> list[str]:
-        return [_INT_TO_LABEL[p] for p in self._model.predict(X)]
-
-    def predict_proba(self, X: pd.DataFrame) -> Any:
-        # self._model.classes_ nội bộ là [0, 1] => cột 0 = P(on_time), cột 1 = P(late).
-        # Đảo cột để khớp self.classes_ = ["late", "on_time"].
-        proba = self._model.predict_proba(X)
-        return proba[:, [1, 0]]
-
+from app.ml.xgboost_classifier import XGBoostClassifier
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -86,7 +48,7 @@ def default_candidates(y: pd.Series) -> dict[str, Pipeline]:
             LogisticRegression(class_weight="balanced", max_iter=5000)
         ),
         "random_forest": _build_pipeline(
-            RandomForestClassifier(class_weight="balanced", random_state=42)
+            RandomForestClassifier(class_weight="balanced", random_state=42, n_jobs=-1)
         ),
         "xgboost": _build_pipeline(
             XGBoostClassifier(scale_pos_weight=scale_pos_weight)

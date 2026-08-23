@@ -2,7 +2,8 @@ import pandas as pd
 from sklearn.dummy import DummyClassifier
 from sklearn.tree import DecisionTreeClassifier
 
-from app.ml.train_model import XGBoostClassifier, select_best_algorithm
+from app.ml.train_model import select_best_algorithm
+from app.ml.xgboost_classifier import XGBoostClassifier
 
 
 def _perfectly_separable_data() -> tuple[pd.DataFrame, pd.Series]:

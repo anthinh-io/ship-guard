@@ -37,7 +37,7 @@ class PredictionResult:
     risk_probability: float
 
 
-def _load_model() -> Any:
+def load_model() -> Any:
     global _model
     if _model is None:
         _model = joblib.load(MODEL_PATH)
@@ -45,7 +45,7 @@ def _load_model() -> Any:
 
 
 def predict(features: OrderFeatures, model: Any | None = None) -> PredictionResult:
-    model = model if model is not None else _load_model()
+    model = model if model is not None else load_model()
 
     df = pd.DataFrame(
         [

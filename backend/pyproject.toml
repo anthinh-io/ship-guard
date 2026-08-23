@@ -94,3 +94,9 @@ error-on-warning = true
 
 [tool.fastapi]
 entrypoint = "app.main:app"
+
+[tool.pytest.ini_options]
+# "slow" = test chạm dữ liệu/artefact thật, mất vài phút (train lại model) — không chạy
+# trong `pytest` mặc định, chỉ chạy khi gọi `pytest -m slow`.
+markers = ["slow: full-retrain / integration tests mất vài phút"]
+addopts = "-m 'not slow'"
