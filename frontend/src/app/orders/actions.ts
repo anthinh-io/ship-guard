@@ -15,6 +15,9 @@ export interface OrderLookupResult {
   customer_city: string | null;
   customer_state: string | null;
   customer_zip_code_prefix: string | null;
+  risk_label: "high" | "low" | null;
+  risk_probability: number | null;
+  predicted_at: string | null;
 }
 
 export type OrderLookupState =

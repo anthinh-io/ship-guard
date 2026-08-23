@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 from typing import Literal
 
 from pydantic import EmailStr
-from sqlalchemy import DateTime
+from sqlalchemy import DateTime, String
 from sqlmodel import Field, SQLModel
 
 
@@ -70,6 +70,14 @@ class Order(SQLModel, table=True):
         sa_type=DateTime(timezone=True),  # type: ignore
     )
     processing_status: str = Field(default="Chưa xử lý", max_length=50)
+    risk_label: Literal["high", "low"] | None = Field(
+        default=None, sa_type=String(10)  # type: ignore
+    )
+    risk_probability: float | None = Field(default=None)
+    predicted_at: datetime | None = Field(
+        default=None,
+        sa_type=DateTime(timezone=True),  # type: ignore
+    )
 
 
 # Database model, database table inferred from class name
@@ -124,6 +132,9 @@ class OrderLookupResult(SQLModel):
     customer_city: str | None
     customer_state: str | None
     customer_zip_code_prefix: str | None
+    risk_label: Literal["high", "low"] | None
+    risk_probability: float | None
+    predicted_at: datetime | None
 
 
 # Properties to return via API, id is always required
