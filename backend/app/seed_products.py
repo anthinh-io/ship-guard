@@ -36,12 +36,14 @@ def _load_translations(csv_path: Path) -> dict[str, str]:
 
 def _map_row(row: dict[str, str], translations: dict[str, str]) -> dict[str, object]:
     category_name = row["product_category_name"] or None
+    weight_g = row["product_weight_g"] or None
     return {
         "product_id": row["product_id"],
         "category_name": category_name,
         "category_name_english": translations.get(category_name, category_name)
         if category_name
         else None,
+        "weight_g": int(weight_g) if weight_g is not None else None,
     }
 
 
@@ -57,7 +59,7 @@ def seed(
         Product,
         rows,
         index_elements=["product_id"],
-        update_columns=["category_name", "category_name_english"],
+        update_columns=["category_name", "category_name_english", "weight_g"],
     )
 
 

@@ -89,6 +89,7 @@ class Product(SQLModel, table=True):
     product_id: str = Field(primary_key=True, max_length=64)
     category_name: str | None = Field(default=None, max_length=100)
     category_name_english: str | None = Field(default=None, max_length=100)
+    weight_g: int | None = Field(default=None)
 
 
 # Database model, database table inferred from class name
