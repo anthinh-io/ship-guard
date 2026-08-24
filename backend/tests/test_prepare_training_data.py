@@ -4,7 +4,11 @@ from datetime import UTC, datetime
 import pandas as pd
 from sqlmodel import Session
 
-from app.ml.prepare_training_data import build_dataset, split_train_test
+from app.ml.prepare_training_data import (
+    build_dataset,
+    data_quality_report,
+    split_train_test,
+)
 from app.models import Customer, Order, OrderItem, OrderPayment, Product, Seller
 
 
@@ -466,3 +470,68 @@ def test_split_train_test_ratio_and_no_overlap() -> None:
     assert len(train_df) == 80
     assert len(test_df) == 20
     assert set(train_df["order_id"]).isdisjoint(set(test_df["order_id"]))
+
+
+def _clean_prepared_dataframe() -> pd.DataFrame:
+    return pd.DataFrame(
+        {
+            "order_id": ["order-1", "order-2"],
+            "seller_state": ["SP", "RJ"],
+            "customer_state": ["RJ", "SP"],
+            "payment_type": ["credit_card", "boleto"],
+            "order_purchase_timestamp": [
+                "2024-01-01T00:00:00+00:00",
+                "2024-02-01T00:00:00+00:00",
+            ],
+            "weight_g": [500, 300],
+            "category": ["toys", "books"],
+            "label": ["on_time", "late"],
+        }
+    )
+
+
+def test_data_quality_report_on_clean_data_reports_no_issues() -> None:
+    df = _clean_prepared_dataframe()
+
+    report = data_quality_report(df)
+
+    assert all(pct == 0 for pct in report["missing_pct_by_column"].values())
+    assert report["duplicate_order_ids"] == 0
+    assert report["unexpected_labels"] == []
+    assert report["unparseable_purchase_timestamps"] == 0
+
+
+def test_data_quality_report_flags_missing_values() -> None:
+    df = _clean_prepared_dataframe()
+    df.loc[0, "weight_g"] = None
+
+    report = data_quality_report(df)
+
+    assert report["missing_pct_by_column"]["weight_g"] == 50.0
+
+
+def test_data_quality_report_flags_duplicate_order_ids() -> None:
+    df = _clean_prepared_dataframe()
+    df.loc[1, "order_id"] = "order-1"
+
+    report = data_quality_report(df)
+
+    assert report["duplicate_order_ids"] == 1
+
+
+def test_data_quality_report_flags_unexpected_labels() -> None:
+    df = _clean_prepared_dataframe()
+    df.loc[1, "label"] = "unknown"
+
+    report = data_quality_report(df)
+
+    assert report["unexpected_labels"] == ["unknown"]
+
+
+def test_data_quality_report_flags_unparseable_timestamps() -> None:
+    df = _clean_prepared_dataframe()
+    df.loc[1, "order_purchase_timestamp"] = "not-a-date"
+
+    report = data_quality_report(df)
+
+    assert report["unparseable_purchase_timestamps"] == 1
