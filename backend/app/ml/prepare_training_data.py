@@ -111,6 +111,21 @@ def build_dataset(session: Session) -> pd.DataFrame:
     )
 
 
+def data_quality_report(df: pd.DataFrame) -> dict[str, object]:
+    missing_pct_by_column = (df.isna().mean() * 100).round(2).to_dict()
+    duplicate_order_ids = int(df["order_id"].duplicated().sum())
+    unexpected_labels = sorted(set(df["label"].unique()) - {"on_time", "late"})
+    unparseable_purchase_timestamps = int(
+        pd.to_datetime(df["order_purchase_timestamp"], errors="coerce").isna().sum()
+    )
+    return {
+        "missing_pct_by_column": missing_pct_by_column,
+        "duplicate_order_ids": duplicate_order_ids,
+        "unexpected_labels": unexpected_labels,
+        "unparseable_purchase_timestamps": unparseable_purchase_timestamps,
+    }
+
+
 def split_train_test(
     df: pd.DataFrame, test_size: float = 0.2, random_state: int = 42
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
@@ -137,6 +152,9 @@ def main() -> None:
         len(test_df),
         OUTPUT_DIR,
     )
+
+    logger.info("Data quality report (train.csv): %s", data_quality_report(train_df))
+    logger.info("Data quality report (test.csv): %s", data_quality_report(test_df))
 
 
 if __name__ == "__main__":
