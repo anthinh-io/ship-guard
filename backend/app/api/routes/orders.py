@@ -1,11 +1,14 @@
 from fastapi import APIRouter, HTTPException
-from sqlmodel import select
+from sqlmodel import col, select
 
 from app.api.deps import SessionDep
+from app.crud import create_order_with_prediction
 from app.delivery import compute_delivery_status
 from app.models import (
     Customer,
     Order,
+    OrderCreate,
+    OrderCreateResult,
     OrderItem,
     OrderLookupItem,
     OrderLookupResult,
@@ -14,6 +17,31 @@ from app.models import (
 )
 
 router = APIRouter(prefix="/orders", tags=["orders"])
+
+
+@router.get("/categories")
+def get_categories(session: SessionDep) -> list[str]:
+    rows = session.exec(
+        select(Product.category_name_english)
+        .where(col(Product.category_name_english).is_not(None))
+        .distinct()
+        .order_by(col(Product.category_name_english))
+    ).all()
+    return [row for row in rows if row is not None]
+
+
+@router.post("", status_code=201)
+def create_order(order_create: OrderCreate, session: SessionDep) -> OrderCreateResult:
+    order = create_order_with_prediction(session=session, order_create=order_create)
+    assert order.risk_label is not None
+    assert order.risk_probability is not None
+    assert order.predicted_at is not None
+    return OrderCreateResult(
+        order_code=order.order_code,
+        risk_label=order.risk_label,
+        risk_probability=order.risk_probability,
+        predicted_at=order.predicted_at,
+    )
 
 
 @router.get("/{code}")

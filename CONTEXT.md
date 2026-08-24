@@ -27,7 +27,24 @@ Xác suất một đơn sẽ giao trễ, do mô hình dự đoán tính ra — l
 Thời điểm mô hình thực hiện dự đoán cho một đơn — lưu trên cột `predicted_at` của `Order`. Chỉ lưu kết quả dự đoán gần nhất, không lưu lịch sử nhiều lần dự đoán.
 
 **Hình thức thanh toán (Payment type)**:
-Loại hình thanh toán của một đơn (vd. `credit_card`, `voucher`, `boleto`) — lưu trên bảng `OrderPayment`, mỗi đơn có thể có nhiều dòng thanh toán. Khi cần một giá trị đại diện duy nhất cho đơn (vd. để huấn luyện mô hình), chọn loại của dòng có `payment_value` cao nhất.
+Loại hình thanh toán của một đơn (vd. `credit_card`, `voucher`, `boleto`). Với Đơn lịch sử: lưu trên bảng `OrderPayment`, mỗi đơn có thể có nhiều dòng thanh toán — khi cần một giá trị đại diện duy nhất (vd. để huấn luyện mô hình), chọn loại của dòng có `payment_value` cao nhất. Với Đơn mới: nhân viên chọn trực tiếp, lưu thẳng vào cột `payment_type` của `Order` (xem [ADR 0006](docs/adr/0006-new-order-features-flat-on-order.md)).
 
 **Thời điểm đặt hàng (Order purchase timestamp)**:
-Thời điểm khách đặt đơn hàng — lưu trên cột `order_purchase_timestamp` của `Order`.
+Thời điểm khách đặt đơn hàng — lưu trên cột `order_purchase_timestamp` của `Order`. Với Đơn mới, mặc định là thời điểm nhân viên mở biểu mẫu, có thể sửa lại.
+
+**Đơn lịch sử (Historical order)**:
+Một đơn hàng import từ dữ liệu Olist gốc, dùng làm dữ liệu huấn luyện mô hình. Cân nặng/danh mục/hình thức thanh toán/vùng người bán/vùng người mua của loại đơn này suy ra qua join với `Product`/`OrderItem`/`OrderPayment`/`Seller`/`Customer`, không lưu trực tiếp trên `Order`.
+_Avoid_: "Đơn cũ" (mơ hồ, không nói rõ là dữ liệu import)
+
+**Đơn mới (New order)**:
+Một đơn hàng do nhân viên vận hành tự nhập qua biểu mẫu nhập đơn, để nhận dự đoán rủi ro ngay. Cân nặng, danh mục, hình thức thanh toán, vùng người bán, vùng người mua của loại đơn này lưu trực tiếp trên `Order` (cột `weight_g`, `category`, `payment_type`, `seller_state`, `customer_state`) — không tạo kèm `Customer`/`Seller`/`Product`/`OrderItem`/`OrderPayment` như Đơn lịch sử (xem [ADR 0006](docs/adr/0006-new-order-features-flat-on-order.md)). Phân biệt Đơn mới với Đơn lịch sử bằng việc 5 cột này có giá trị hay không — không có cột đánh dấu loại đơn riêng.
+_Avoid_: "Đơn nhập tay" (không phải thuật ngữ chính thức)
+
+**Cân nặng đơn (Order weight)**:
+Tổng cân nặng (gram) của một đơn hàng, dùng làm đặc trưng dự đoán rủi ro. Với Đơn lịch sử: tổng `weight_g` của tất cả sản phẩm (`Product`) trong đơn qua `OrderItem`. Với Đơn mới: nhân viên nhập bằng kilogram trên biểu mẫu, quy đổi sang gram trước khi lưu vào cột `weight_g` của `Order`.
+
+**Danh mục (Category)**:
+Danh mục sản phẩm của một đơn hàng, dùng làm đặc trưng dự đoán rủi ro. Với Đơn lịch sử: `category_name_english` của sản phẩm thuộc `OrderItem` có `order_item_id` nhỏ nhất. Với Đơn mới: nhân viên chọn từ danh sách danh mục thật đã có trong `Product`, lưu trực tiếp vào cột `category` của `Order`.
+
+**Vùng người bán / Vùng người mua (Seller state / Customer state)**:
+Mã bang Brazil (2 ký tự) nơi người bán gửi hàng / nơi người mua nhận hàng, dùng làm đặc trưng dự đoán rủi ro. Với Đơn lịch sử: `seller_state` của `Seller` (qua `OrderItem` có `order_item_id` nhỏ nhất) / `customer_state` của `Customer` (qua `Order.customer_id`). Với Đơn mới: nhân viên chọn từ đủ 27 mã bang Brazil, lưu trực tiếp vào cột `seller_state`/`customer_state` của `Order` — không giới hạn theo các bang đã từng xuất hiện trong dữ liệu lịch sử.

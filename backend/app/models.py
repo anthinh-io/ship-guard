@@ -11,6 +11,13 @@ def get_datetime_utc() -> datetime:
     return datetime.now(UTC)
 
 
+BrazilState = Literal[
+    "AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", "MT", "MS", "MG",
+    "PA", "PB", "PR", "PE", "PI", "RJ", "RN", "RS", "RO", "RR", "SC", "SP", "SE", "TO",
+]
+PaymentType = Literal["boleto", "credit_card", "debit_card", "voucher"]
+
+
 # Shared properties
 class UserBase(SQLModel):
     email: EmailStr = Field(unique=True, index=True, max_length=255)
@@ -82,6 +89,11 @@ class Order(SQLModel, table=True):
         default=None,
         sa_type=DateTime(timezone=True),  # type: ignore
     )
+    weight_g: int | None = Field(default=None)
+    category: str | None = Field(default=None, max_length=100)
+    payment_type: PaymentType | None = Field(default=None, sa_type=String(32))  # type: ignore
+    seller_state: BrazilState | None = Field(default=None, sa_type=String(2))  # type: ignore
+    customer_state: BrazilState | None = Field(default=None, sa_type=String(2))  # type: ignore
 
 
 # Database model, database table inferred from class name
@@ -135,6 +147,23 @@ class OrderLookupItem(SQLModel):
     product_category: str | None
     seller_city: str | None
     seller_state: str | None
+
+
+class OrderCreate(SQLModel):
+    weight_g: int = Field(gt=0)
+    category: str = Field(min_length=1)
+    payment_type: PaymentType
+    seller_state: BrazilState
+    customer_state: BrazilState
+    order_purchase_timestamp: datetime
+    estimated_delivery_date: datetime
+
+
+class OrderCreateResult(SQLModel):
+    order_code: str
+    risk_label: Literal["high", "low"]
+    risk_probability: float
+    predicted_at: datetime
 
 
 class OrderLookupResult(SQLModel):
