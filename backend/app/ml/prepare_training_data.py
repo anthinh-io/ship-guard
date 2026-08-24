@@ -1,5 +1,5 @@
 # Module này (backend/app/ml/) là ngoại lệ duy nhất cho phép dùng pandas/scikit-learn
-# trong backend — phần seed/API còn lại vẫn không dùng pandas (xem CONTEXT.md).
+# trong backend — phần seed/API còn lại vẫn không dùng pandas (xem docs/adr/0003-xgboost-dependency-placement.md).
 import logging
 from collections import defaultdict
 from pathlib import Path
@@ -10,7 +10,7 @@ from sqlmodel import Session, select
 
 from app.core.db import engine
 from app.delivery import compute_delivery_status
-from app.models import Customer, Order, OrderItem, OrderPayment, Seller
+from app.models import Customer, Order, OrderItem, OrderPayment, Product, Seller
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -22,6 +22,7 @@ def build_dataset(session: Session) -> pd.DataFrame:
     orders = session.exec(select(Order)).all()
     customers = {c.customer_id: c for c in session.exec(select(Customer)).all()}
     sellers = {s.seller_id: s for s in session.exec(select(Seller)).all()}
+    products = {p.product_id: p for p in session.exec(select(Product)).all()}
 
     payments_by_order: dict[str, list[OrderPayment]] = defaultdict(list)
     for payment in session.exec(select(OrderPayment)).all():
@@ -53,15 +54,32 @@ def build_dataset(session: Session) -> pd.DataFrame:
             items_by_order.get(order.order_code, []), key=lambda i: i.order_item_id
         )
         seller_state = None
+        category = None
         if items:
             seller = sellers.get(items[0].seller_id)
             seller_state = seller.seller_state if seller else None
+            first_product = products.get(items[0].product_id)
+            category = first_product.category_name_english if first_product else None
+
+        weight_g = None
+        if items:
+            resolved_weights: list[int] = []
+            for item in items:
+                product = products.get(item.product_id)
+                if product is None or product.weight_g is None:
+                    resolved_weights = []
+                    break
+                resolved_weights.append(product.weight_g)
+            if resolved_weights:
+                weight_g = sum(resolved_weights)
 
         if (
             seller_state is None
             or customer_state is None
             or payment_type is None
             or order.order_purchase_timestamp is None
+            or weight_g is None
+            or category is None
         ):
             continue
 
@@ -72,6 +90,8 @@ def build_dataset(session: Session) -> pd.DataFrame:
                 "customer_state": customer_state,
                 "payment_type": payment_type,
                 "order_purchase_timestamp": order.order_purchase_timestamp,
+                "weight_g": weight_g,
+                "category": category,
                 "label": label,
             }
         )
@@ -84,6 +104,8 @@ def build_dataset(session: Session) -> pd.DataFrame:
             "customer_state",
             "payment_type",
             "order_purchase_timestamp",
+            "weight_g",
+            "category",
             "label",
         ],
     )

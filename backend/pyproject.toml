@@ -21,6 +21,8 @@ dependencies = [
     "pwdlib[argon2,bcrypt]>=0.3.0",
     "pandas>=3.0.5",
     "scikit-learn>=1.9.0",
+    "xgboost>=3.4.1",
+    "joblib>=1.5.3",
 ]
 
 [dependency-groups]
@@ -43,6 +45,10 @@ exclude = ["venv", ".venv", "alembic"]
 
 [[tool.mypy.overrides]]
 module = "sklearn.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "joblib.*"
 ignore_missing_imports = true
 
 [tool.ruff]
@@ -88,3 +94,9 @@ error-on-warning = true
 
 [tool.fastapi]
 entrypoint = "app.main:app"
+
+[tool.pytest.ini_options]
+# "slow" = test chạm dữ liệu/artefact thật, mất vài phút (train lại model) — không chạy
+# trong `pytest` mặc định, chỉ chạy khi gọi `pytest -m slow`.
+markers = ["slow: full-retrain / integration tests mất vài phút"]
+addopts = "-m 'not slow'"
