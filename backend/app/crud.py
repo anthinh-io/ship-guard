@@ -1,9 +1,18 @@
+import uuid
 from typing import Any
 
 from sqlmodel import Session, select
 
 from app.core.security import get_password_hash, verify_password
-from app.models import User, UserCreate, UserUpdate
+from app.ml.predict import OrderFeatures, predict
+from app.models import (
+    Order,
+    OrderCreate,
+    User,
+    UserCreate,
+    UserUpdate,
+    get_datetime_utc,
+)
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
@@ -28,6 +37,38 @@ def update_user(*, session: Session, db_user: User, user_in: UserUpdate) -> Any:
     session.commit()
     session.refresh(db_user)
     return db_user
+
+
+def create_order_with_prediction(
+    *, session: Session, order_create: OrderCreate, model: Any | None = None
+) -> Order:
+    features = OrderFeatures(
+        seller_state=order_create.seller_state,
+        customer_state=order_create.customer_state,
+        payment_type=order_create.payment_type,
+        category=order_create.category,
+        weight_g=order_create.weight_g,
+        order_purchase_timestamp=order_create.order_purchase_timestamp,
+    )
+    result = predict(features, model=model)
+
+    order = Order(
+        order_code=str(uuid.uuid4()),
+        weight_g=order_create.weight_g,
+        category=order_create.category,
+        payment_type=order_create.payment_type,
+        seller_state=order_create.seller_state,
+        customer_state=order_create.customer_state,
+        order_purchase_timestamp=order_create.order_purchase_timestamp,
+        estimated_delivery_date=order_create.estimated_delivery_date,
+        risk_label=result.risk_label,
+        risk_probability=result.risk_probability,
+        predicted_at=get_datetime_utc(),
+    )
+    session.add(order)
+    session.commit()
+    session.refresh(order)
+    return order
 
 
 def get_user_by_email(*, session: Session, email: str) -> User | None:

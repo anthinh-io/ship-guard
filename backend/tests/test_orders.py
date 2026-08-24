@@ -1,6 +1,7 @@
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 
+import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, select
 
@@ -179,3 +180,64 @@ def test_lookup_order_without_prediction_returns_null_risk_fields(db: Session) -
     assert data["risk_label"] is None
     assert data["risk_probability"] is None
     assert data["predicted_at"] is None
+
+
+def _valid_create_payload() -> dict:
+    return {
+        "weight_g": 1500,
+        "category": "beleza_saude",
+        "payment_type": "credit_card",
+        "seller_state": "SP",
+        "customer_state": "RJ",
+        "order_purchase_timestamp": datetime.now(UTC).isoformat(),
+        "estimated_delivery_date": (datetime.now(UTC) + timedelta(days=7)).isoformat(),
+    }
+
+
+@pytest.mark.usefixtures("db")
+def test_create_order_returns_201_with_prediction() -> None:
+    response = client.post("/api/v1/orders", json=_valid_create_payload())
+
+    assert response.status_code == 201
+    data = response.json()
+    assert data["risk_label"] in ("high", "low")
+    assert isinstance(data["risk_probability"], float)
+    assert data["predicted_at"] is not None
+    assert uuid.UUID(data["order_code"])
+
+
+@pytest.mark.usefixtures("db")
+def test_create_order_rejects_invalid_payment_type() -> None:
+    payload = _valid_create_payload()
+    payload["payment_type"] = "not_defined"
+
+    response = client.post("/api/v1/orders", json=payload)
+
+    assert response.status_code == 422
+    detail = response.json()["detail"]
+    assert any(err["loc"][-1] == "payment_type" for err in detail)
+
+
+@pytest.mark.usefixtures("db")
+def test_create_order_rejects_missing_field() -> None:
+    payload = _valid_create_payload()
+    del payload["weight_g"]
+
+    response = client.post("/api/v1/orders", json=payload)
+
+    assert response.status_code == 422
+    detail = response.json()["detail"]
+    assert any(err["loc"][-1] == "weight_g" for err in detail)
+
+
+def test_get_categories_returns_distinct_sorted_list(db: Session) -> None:
+    db.add(Product(product_id="p1", category_name_english="toys"))
+    db.add(Product(product_id="p2", category_name_english="toys"))
+    db.add(Product(product_id="p3", category_name_english="electronics"))
+    db.add(Product(product_id="p4", category_name_english=None))
+    db.commit()
+
+    response = client.get("/api/v1/orders/categories")
+
+    assert response.status_code == 200
+    assert response.json() == ["electronics", "toys"]
