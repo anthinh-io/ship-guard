@@ -11,7 +11,7 @@ Vẫn giữ lại phần cốt lõi giúp Agile hiệu quả:
 - **Nhịp sprint cố định (1 tuần)** — ép tiến độ, phát hiện rủi ro sớm thay vì dồn việc đến gần deadline.
 - **Sprint Goal rõ ràng** — mỗi tuần có một mục tiêu có thể tự kiểm chứng, thay vì mốc giai đoạn mơ hồ kéo dài 3-4 tuần.
 - **Mỗi Sprint giao một lát cắt xuyên suốt (vertical slice)** — làm đủ từ dữ liệu đến model, API, UI ở mức tối thiểu trong cùng một sprint, thay vì làm xong hẳn một tầng rồi mới chuyển sang tầng khác. Nhờ vậy sau mỗi sprint đều có một thứ dùng được, dù còn thô, không phải chờ đến gần cuối dự án mới thấy giá trị.
-- **Sprint Review/Retro rút gọn** — cuối mỗi tuần tự ghi 2-3 dòng: đạt goal chưa, cần điều chỉnh gì cho tuần sau (ghi trực tiếp trong Issue đóng milestone, không cần họp hay tập tin riêng).
+- **Sprint Review/Retro rút gọn** — cuối mỗi tuần tự đánh giá, ghi vào Issue riêng "Iteration N — Retrospective" theo outline ở mục 8, không cần họp hay dựng tập tin kế hoạch riêng.
 - **Tài liệu kế hoạch mô tả hiện tại** — ghi mục tiêu đang có hiệu lực, không thuật lại lịch sử điều chỉnh (việc đó đã có trong commit/PR/Issue).
 
 ## 2. Ba cấp độ phân rã công việc
@@ -75,9 +75,9 @@ Một Issue/Sprint được coi là hoàn thành khi:
 - [ ] Code/chức năng chạy được, không lỗi khi thực thi thử
 - [ ] Không có rò rỉ dữ liệu (data leakage) đối với các task liên quan đến mô hình học máy
 - [ ] Đã commit/tạo Pull Request tương ứng
-- [ ] Tự đánh giá lại Sprint Goal (đạt/chưa đạt) và ghi chú điều chỉnh cho sprint sau ngay trong Issue đóng milestone
+- [ ] Tự đánh giá lại Sprint Goal (đạt/chưa đạt) và ghi chú điều chỉnh cho sprint sau trong Issue "Iteration N — Retrospective"
 
-Ghi chú điều chỉnh thuộc về Issue khi đóng sprint — các tài liệu kế hoạch khác (roadmap, wireframe) chỉ nên mô tả trạng thái hiện tại, không thuật lại lý do thay đổi so với bản trước.
+Ghi chú điều chỉnh thuộc về Issue Retrospective khi đóng sprint — các tài liệu kế hoạch khác (roadmap, wireframe) chỉ nên mô tả trạng thái hiện tại, không thuật lại lý do thay đổi so với bản trước.
 
 ## 7. Tiêu chí chấp nhận (Acceptance Criteria): Checklist hay Given–When–Then?
 
@@ -145,3 +145,14 @@ Ghi chú điều chỉnh thuộc về Issue khi đóng sprint — các tài li�
 > - **Then** hệ thống gọi API thật và hiển thị kết quả trong vài giây
 
 Đây là hành vi hệ thống thật: có actor (người quản lý vận hành), có action rõ ràng (nhập biểu mẫu), có phản hồi rõ ràng (kết quả hiển thị). Nếu viết bằng checklist thuần, sẽ mất luôn thông tin "ai thao tác, thao tác gì" — chỉ còn lại "có kết quả", làm khó hình dung lại kịch bản khi đọc lại sau này hoặc khi chuyển thành test e2e.
+
+## 8. Tài liệu tham khảo: Sprint Review/Retrospective
+
+Mặc định dùng Issue riêng "Iteration N — Retrospective", theo outline:
+
+1. **Sprint Goal & mức đạt được** — trả lời câu hỏi "sprint này có làm đúng thứ đã hứa không", tách bạch khỏi số lượng ticket (hoàn thành nhiều ticket không đồng nghĩa đạt goal — số đó thuộc mục 2).
+2. **Sprint Review** — bằng chứng cụ thể đã hoàn thành/thử nghiệm được, làm căn cứ cho nhận định đạt/chưa đạt ở mục 1 — để người đọc lại hình dung được sản phẩm thật đã thay đổi thế nào, không chỉ đọc danh sách ticket.
+3. **Retro: Làm tốt / Cần điều chỉnh** — tách riêng cái nên giữ khỏi cái cần sửa, để mục 5 (action item) bắt nguồn rõ ràng từ đây thay vì lẫn lộn giữa khen và phê bình.
+4. **Carryover** — ghi nhận trung thực việc chưa xong, tránh việc dở dang âm thầm biến mất khỏi tầm nhìn khi đóng sprint. Bỏ qua nếu sprint đóng tròn.
+5. **Action item cho sprint sau** — biến nhận định ở mục 3/4 thành việc làm cụ thể, kiểm tra được (checkbox `- [ ]`) — không có mục này, retro chỉ dừng ở nhận xét, không tạo ra thay đổi hành vi thật.
+6. **Liên kết** — trỏ tới bằng chứng/tài liệu chi tiết hơn (PR, Issue...) khi cần, giữ nội dung Issue chính ngắn gọn mà vẫn truy được gốc. Bỏ qua nếu không có.
